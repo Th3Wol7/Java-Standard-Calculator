@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainScreen implements ActionListener {
-    private JLabel titleLabel;
+    private JLabel  titleLabel;
     private JTextField  displayArea, equationArea;
     private JButton oneBtn, twoBtn, threeBtn, fourBtn;
     private JButton fiveBtn, sixBtn, sevenBtn, eightBtn;
