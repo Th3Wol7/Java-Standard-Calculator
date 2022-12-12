@@ -11,18 +11,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainScreen implements ActionListener {
-    private JLabel  titleLabel;
-    private JTextField  displayArea, equationArea;
-    private JButton oneBtn, twoBtn, threeBtn, fourBtn;
-    private JButton fiveBtn, sixBtn, sevenBtn, eightBtn;
-    private JButton nineBtn, zeroBtn, plusBtn, minusBtn;
-    private JButton multiplyBtn, divideBtn, pointBtn;
+    private JLabel titleLabel;
+    private JTextField displayArea, equationArea;
+    private JButton oneBtn, twoBtn, threeBtn, fourBtn, fiveBtn;
+    private JButton sixBtn, sevenBtn, eightBtn, nineBtn, zeroBtn;
+    private JButton plusBtn, minusBtn, multiplyBtn, divideBtn, pointBtn;
     private JButton plusOrMinusBtn, equalBtn, squareBtn, squareRootBtn;
     private JButton clearEntryBtn, clearBtn, percentageBtn, memoryClearBtn;
     private JButton memoryAddBtn, memoryRemoveBtn, memoryBtn, reciprocalBtn, deleteBtn;
     private JPanel mainPanel, memoryPanel;
     private JFrame mainFrame;
-    private double results, num, prev;
+    private double results, num;
     private int calculation;
 
     public MainScreen() {
@@ -32,8 +31,7 @@ public class MainScreen implements ActionListener {
         registerListeners();
     }
 
-    //This method initializes all the component of the calculator and
-    //add them to the panel which gets added to the frame.
+    //This method initializes all the component of the calculator.
     private void initializeComponents() {
         mainFrame = new JFrame("Calculator");
         mainPanel = new JPanel();
@@ -54,6 +52,7 @@ public class MainScreen implements ActionListener {
         displayArea.setBackground(null);
         displayArea.setBounds(0, 76, 320, 55);
         displayArea.setHorizontalAlignment(SwingConstants.RIGHT);
+        //displayArea.setEnabled(false);
 
         equationArea = new JTextField();
         equationArea.setFont(labelFont);
@@ -62,6 +61,7 @@ public class MainScreen implements ActionListener {
         equationArea.setBackground(null);
         equationArea.setBounds(0, 40, 320, 35);
         equationArea.setHorizontalAlignment(SwingConstants.RIGHT);
+        //equationArea.setEnabled(false);
 
         oneBtn = new JButton("1");
         oneBtn.setBounds(8, 400, 70, 45);
@@ -148,15 +148,14 @@ public class MainScreen implements ActionListener {
         memoryBtn.setBounds(242, 140, 70, 45);
 
         JButton[] allButtons = {
-                oneBtn, twoBtn, threeBtn, fourBtn, fiveBtn, sixBtn, sevenBtn,
-                eightBtn, nineBtn, zeroBtn, plusBtn, minusBtn, multiplyBtn,
-                divideBtn, pointBtn, plusOrMinusBtn, equalBtn, squareBtn, squareRootBtn,
-                clearEntryBtn, clearBtn, percentageBtn, memoryClearBtn, memoryAddBtn,
-                memoryRemoveBtn, memoryBtn, reciprocalBtn, deleteBtn
+                oneBtn, twoBtn, threeBtn, fourBtn, fiveBtn, sixBtn, sevenBtn, eightBtn,
+                nineBtn, zeroBtn, plusBtn, minusBtn, multiplyBtn, divideBtn, pointBtn,
+                plusOrMinusBtn, equalBtn, squareBtn, squareRootBtn, clearEntryBtn, clearBtn,
+                percentageBtn, memoryClearBtn, memoryAddBtn, memoryRemoveBtn, memoryBtn,
+                reciprocalBtn, deleteBtn
         };
         JButton[] memoryButtons = {
-                memoryClearBtn, memoryAddBtn,
-                memoryRemoveBtn, memoryBtn
+                memoryClearBtn, memoryAddBtn, memoryRemoveBtn, memoryBtn
         };
         for (JButton button : allButtons) {
             button.setFont(labelFont);
@@ -251,8 +250,8 @@ public class MainScreen implements ActionListener {
         deleteBtn.addActionListener(this);
     }
 
-    //This method determines which operation should take place
-    private void operation(){
+    //This method determines which operation should take place and computes the equation it
+    private void operation() {
         switch (calculation) {
             case 1 -> {//Addition
                 results = num + Double.parseDouble(displayArea.getText());
@@ -270,76 +269,209 @@ public class MainScreen implements ActionListener {
                 displayArea.setText(Double.toString(results));
             }
             case 4 -> { //Division
-                results = num / Double.parseDouble(displayArea.getText());
                 equationArea.setText(num + " ÷ " + displayArea.getText() + " = ");
-                displayArea.setText(Double.toString(results));
+                if (Double.parseDouble(displayArea.getText()) == 0 || Double.parseDouble(displayArea.getText()) == 0.0) {
+                    displayArea.setText("Cannot divide by zero");
+                    results = 0;
+                    num = 0;
+                    errorDisable();
+                } else {
+                    results = num / Double.parseDouble(displayArea.getText());
+                    displayArea.setText(Double.toString(results));
+                }
             }
         }
+    }
+
+    //This method disables certain buttons when a math error occurs
+    private void errorDisable() {
+        plusBtn.setEnabled(false);
+        minusBtn.setEnabled(false);
+        multiplyBtn.setEnabled(false);
+        divideBtn.setEnabled(false);
+        pointBtn.setEnabled(false);
+        plusOrMinusBtn.setEnabled(false);
+        equalBtn.setEnabled(false);
+        squareBtn.setEnabled(false);
+        squareRootBtn.setEnabled(false);
+        percentageBtn.setEnabled(false);
+        memoryClearBtn.setEnabled(false);
+        memoryAddBtn.setEnabled(false);
+        memoryRemoveBtn.setEnabled(false);
+        memoryBtn.setEnabled(false);
+        reciprocalBtn.setEnabled(false);
+    }
+
+    //This method enables certain buttons when a math error occurs
+    private void errorEnable() {
+        plusBtn.setEnabled(true);
+        minusBtn.setEnabled(true);
+        multiplyBtn.setEnabled(true);
+        divideBtn.setEnabled(true);
+        pointBtn.setEnabled(true);
+        plusOrMinusBtn.setEnabled(true);
+        equalBtn.setEnabled(true);
+        squareBtn.setEnabled(true);
+        squareRootBtn.setEnabled(true);
+        percentageBtn.setEnabled(true);
+        memoryClearBtn.setEnabled(true);
+        memoryAddBtn.setEnabled(true);
+        memoryRemoveBtn.setEnabled(true);
+        memoryBtn.setEnabled(true);
+        reciprocalBtn.setEnabled(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         String value, equation = "";
-        boolean check1 = false;
-
         if (e.getSource() == oneBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "1";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "1";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "1";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == twoBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "2";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "2";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "2";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == threeBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "3";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "3";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "3";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == fourBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "4";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "4";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "4";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == fiveBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "5";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "5";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "5";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == sixBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "6";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "6";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "6";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == sevenBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "7";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "7";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "7";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == eightBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "8";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "8";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "8";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == nineBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "9";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "9";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "9";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == zeroBtn) {
-            if (displayArea.getText().length() <= 28) {
-                value = displayArea.getText() + "0";
+            if (displayArea.getText().length() <= 28) {//this ensures the values stay within the bounds of the display
+                value = "0";
+                try {
+                    if (!displayArea.getText().equals("") && num != Double.parseDouble(displayArea.getText())) {
+                        value = displayArea.getText() + "0";
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Bad read due to division by zero or other math error");
+                    equationArea.setText("");
+                }
                 displayArea.setText(value);
+                errorEnable();
             }
         }
         if (e.getSource() == plusOrMinusBtn) {
@@ -352,12 +484,12 @@ public class MainScreen implements ActionListener {
             displayArea.setText(value);
         }
         if (e.getSource() == minusBtn) {
-            if(equationArea.getText().contains("=")){
+            if (equationArea.getText().contains("=")) {//if a calculation was already done
                 equationArea.setText(Double.toString(results));
             }
-            if(equationArea.getText().equals("")) {
+            if (equationArea.getText().equals("")) {//if the equation display is clear
                 equation = displayArea.getText() + " - ";
-            }else{
+            } else {
                 equation += displayArea.getText() + " - ";
             }
             num = Double.parseDouble(displayArea.getText());
@@ -365,12 +497,12 @@ public class MainScreen implements ActionListener {
             equationArea.setText(equation);
         }
         if (e.getSource() == multiplyBtn) {
-            if(equationArea.getText().contains("=")){
+            if (equationArea.getText().contains("=")) {
                 equationArea.setText(Double.toString(results));
             }
-            if(equationArea.getText().equals("")) {
+            if (equationArea.getText().equals("")) {
                 equation = displayArea.getText() + " x ";
-            }else{
+            } else {
                 equation += displayArea.getText() + " x ";
             }
             num = Double.parseDouble(displayArea.getText());
@@ -378,12 +510,12 @@ public class MainScreen implements ActionListener {
             equationArea.setText(equation);
         }
         if (e.getSource() == plusBtn) {
-            if(equationArea.getText().contains("=")){
+            if (equationArea.getText().contains("=")) {
                 equationArea.setText(Double.toString(results));
             }
-            if(equationArea.getText().equals("")) {
+            if (equationArea.getText().equals("")) {
                 equation = displayArea.getText() + " + ";
-            }else{
+            } else {
                 equation += displayArea.getText() + " + ";
             }
             num = Double.parseDouble(displayArea.getText());
@@ -391,12 +523,12 @@ public class MainScreen implements ActionListener {
             equationArea.setText(equation);
         }
         if (e.getSource() == divideBtn) {
-            if(equationArea.getText().contains("=")){
+            if (equationArea.getText().contains("=")) {
                 equationArea.setText(Double.toString(results));
             }
-            if(equationArea.getText().equals("")) {
+            if (equationArea.getText().equals("")) {
                 equation = displayArea.getText() + " ÷ ";
-            }else{
+            } else {
                 equation += displayArea.getText() + " ÷ ";
             }
             num = Double.parseDouble(displayArea.getText());
@@ -406,10 +538,9 @@ public class MainScreen implements ActionListener {
         if (e.getSource() == pointBtn) {
             value = displayArea.getText();
             if (!value.contains(".")) {
-                if (value.equals("")) {
-                    value += "0";
+                if (value.equals("")) {//if display area is empty and a decimal point is added
+                    value += "0";//insert a zero in front of decimal point
                 }
-
                 value += ".";
                 displayArea.setText(value);
             }
@@ -426,9 +557,16 @@ public class MainScreen implements ActionListener {
         }
         if (e.getSource() == reciprocalBtn) {
             value = displayArea.getText();
-            if (!value.equals("") && !value.equals(".")) {
-                equationArea.setText("1/(" + Float.valueOf(value) + ")");
-                displayArea.setText(String.valueOf(1 / Double.parseDouble(value)));
+            try {
+                if (!value.equals("") && !value.equals(".") && Double.parseDouble(displayArea.getText()) != 0) {
+                    equationArea.setText("1/(" + Float.valueOf(value) + ")");
+                    displayArea.setText(String.valueOf(1 / Double.parseDouble(value)));
+                }
+            } catch (NumberFormatException ex) {
+                System.out.println("Bad read due to division by zero or other math error");
+                equationArea.setText("");
+                displayArea.setText("cannot divide by zero");
+                errorDisable();
             }
         }
         if (e.getSource() == squareBtn) {
@@ -453,9 +591,9 @@ public class MainScreen implements ActionListener {
             displayArea.setText(value);
         }
         if (e.getSource() == percentageBtn) {
-            if(equationArea.getText().contains("+") || equationArea.getText().contains("-")
-            ||equationArea.getText().contains("÷") || equationArea.getText().contains("x") ) {
-                displayArea.setText(Double.toString(num*(num/100)));
+            if (equationArea.getText().contains("+") || equationArea.getText().contains("-")
+                    || equationArea.getText().contains("÷") || equationArea.getText().contains("x")) {
+                displayArea.setText(Double.toString(num * (num / 100)));
             }
         }
         if (e.getSource() == memoryAddBtn) {
@@ -469,238 +607,3 @@ public class MainScreen implements ActionListener {
         }
     }
 }
-
-/*
- private void initializeComponents() {
-        mainFrame = new JFrame("Calculator");
-        gbc = new GridBagConstraints();
-        mainPanel = new JPanel();
-        mainPanel.setSize(340, 540);
-
-        Font labelFont = new Font("Oswald", Font.PLAIN, 13);
-        Color btnColour = new Color(255, 255, 255);
-        Dimension btnDimension = new Dimension(75, 50);
-
-        titleLabel = new JLabel("Standard", SwingConstants.CENTER);
-        titleLabel.setBounds(20, 20, 30, 40);
-
-        displayArea = new JTextArea();
-        displayArea.setFont(labelFont);
-        displayArea.setBackground(btnColour);
-
-        oneBtn = new JButton("1");
-        oneBtn.setFont(labelFont);
-        oneBtn.setFocusPainted(false);
-        oneBtn.setBackground(btnColour);
-        oneBtn.setBorder(null);
-        oneBtn.setPreferredSize(btnDimension);
-        titleLabel.setBounds(20, 20, 30, 40);
-
-
-
-
-        twoBtn = new JButton("2");
-        twoBtn.setFont(labelFont);
-        twoBtn.setFocusPainted(false);
-        twoBtn.setBackground(btnColour);
-        twoBtn.setBorder(null);
-        twoBtn.setPreferredSize(btnDimension);
-
-        threeBtn = new JButton("3");
-        threeBtn.setFont(labelFont);
-        threeBtn.setFocusPainted(false);
-        threeBtn.setBackground(btnColour);
-        threeBtn.setBorder(null);
-        threeBtn.setPreferredSize(btnDimension);
-
-
-        fourBtn = new JButton("4");
-        fourBtn.setFont(labelFont);
-        fourBtn.setFocusPainted(false);
-        fourBtn.setBackground(btnColour);
-        fourBtn.setBorder(null);
-        fourBtn.setPreferredSize(btnDimension);
-
-
-        fiveBtn = new JButton("5");
-        fiveBtn.setFont(labelFont);
-        fiveBtn.setFocusPainted(false);
-        fiveBtn.setBackground(btnColour);
-        fiveBtn.setBorder(null);
-        fiveBtn.setPreferredSize(btnDimension);
-
-
-        sixBtn = new JButton("6");
-        sixBtn.setFont(labelFont);
-        sixBtn.setFocusPainted(false);
-        sixBtn.setBackground(btnColour);
-        sixBtn.setBorder(null);
-        sixBtn.setPreferredSize(btnDimension);
-
-
-        sevenBtn = new JButton("7");
-        sevenBtn.setFont(labelFont);
-        sevenBtn.setFocusPainted(false);
-        sevenBtn.setBackground(btnColour);
-        sevenBtn.setBorder(null);
-        sevenBtn.setPreferredSize(btnDimension);
-
-        eightBtn = new JButton("8");
-        eightBtn.setFont(labelFont);
-        eightBtn.setFocusPainted(false);
-        eightBtn.setBackground(btnColour);
-        eightBtn.setBorder(null);
-        eightBtn.setPreferredSize(btnDimension);
-
-
-        nineBtn = new JButton("9");
-        nineBtn.setFont(labelFont);
-        nineBtn.setFocusPainted(false);
-        nineBtn.setBackground(btnColour);
-        nineBtn.setBorder(null);
-        nineBtn.setPreferredSize(btnDimension);
-
-        zeroBtn = new JButton("0");
-        zeroBtn.setFont(labelFont);
-        zeroBtn.setFocusPainted(false);
-        zeroBtn.setBackground(btnColour);
-        zeroBtn.setBorder(null);
-        zeroBtn.setPreferredSize(btnDimension);
-
-
-        squareBtn = new JButton("x²");
-        squareBtn.setFont(labelFont);
-        squareBtn.setFocusPainted(false);
-        squareBtn.setBackground(btnColour);
-        squareBtn.setBorder(null);
-        squareBtn.setPreferredSize(btnDimension);
-
-
-        squareRootBtn = new JButton("²√x");
-        squareRootBtn.setFont(labelFont);
-        squareRootBtn.setFocusPainted(false);
-        squareRootBtn.setBackground(btnColour);
-        squareRootBtn.setBorder(null);
-        squareRootBtn.setPreferredSize(btnDimension);
-
-        reciprocalBtn = new JButton("1/x");
-        reciprocalBtn.setFont(labelFont);
-        reciprocalBtn.setFocusPainted(false);
-        reciprocalBtn.setBackground(btnColour);
-        reciprocalBtn.setBorder(null);
-        reciprocalBtn.setPreferredSize(btnDimension);
-
-        plusOrMinusBtn = new JButton("+/-");
-        plusOrMinusBtn.setFont(labelFont);
-        plusOrMinusBtn.setFocusPainted(false);
-        plusOrMinusBtn.setBackground(btnColour);
-        plusOrMinusBtn.setBorder(null);
-        plusOrMinusBtn.setPreferredSize(btnDimension);
-
-        pointBtn = new JButton(".");
-        pointBtn.setFont(labelFont);
-        pointBtn.setFocusPainted(false);
-        pointBtn.setBackground(btnColour);
-        pointBtn.setBorder(null);
-        pointBtn.setPreferredSize(btnDimension);
-
-        equalBtn = new JButton("=");
-        equalBtn.setFont(labelFont);
-        equalBtn.setFocusPainted(false);
-        equalBtn.setBackground(new Color(232, 126, 12));
-        equalBtn.setBorder(null);
-        equalBtn.setPreferredSize(btnDimension);
-
-
-        plusBtn = new JButton("+");
-        plusBtn.setFont(labelFont);
-        plusBtn.setFocusPainted(false);
-        plusBtn.setBackground(btnColour);
-        plusBtn.setBorder(null);
-        plusBtn.setPreferredSize(btnDimension);
-
-
-        minusBtn = new JButton("-");
-        minusBtn.setFont(labelFont);
-        minusBtn.setFocusPainted(false);
-        minusBtn.setBackground(btnColour);
-        minusBtn.setBorder(null);
-        minusBtn.setPreferredSize(btnDimension);
-
-
-        multiplyBtn = new JButton("x");
-        multiplyBtn.setFont(labelFont);
-        multiplyBtn.setFocusPainted(false);
-        multiplyBtn.setBackground(btnColour);
-        multiplyBtn.setBorder(null);
-        multiplyBtn.setPreferredSize(btnDimension);
-
-
-        divideBtn = new JButton("÷");
-        divideBtn.setFont(labelFont);
-        divideBtn.setFocusPainted(false);
-        divideBtn.setBackground(btnColour);
-        divideBtn.setBorder(null);
-        displayArea.setPreferredSize(btnDimension);
-
-
-        deleteBtn = new JButton("del");
-        deleteBtn.setFont(labelFont);
-        deleteBtn.setFocusPainted(false);
-        deleteBtn.setBackground(btnColour);
-        deleteBtn.setBorder(null);
-        deleteBtn.setPreferredSize(btnDimension);
-
-
-        clearBtn = new JButton("C");
-        clearBtn.setFont(labelFont);
-        clearBtn.setFocusPainted(false);
-        clearBtn.setBackground(btnColour);
-        clearBtn.setBorder(null);
-        clearBtn.setPreferredSize(btnDimension);
-
-
-        clearEntryBtn = new JButton("CE");
-        clearEntryBtn.setFont(labelFont);
-        clearEntryBtn.setFocusPainted(false);
-        clearEntryBtn.setBackground(btnColour);
-        clearEntryBtn.setBorder(null);
-        clearEntryBtn.setPreferredSize(btnDimension);
-
-        percentageBtn = new JButton("%");
-        percentageBtn.setFont(labelFont);
-        percentageBtn.setFocusPainted(false);
-        percentageBtn.setBackground(btnColour);
-        percentageBtn.setBorder(null);
-        percentageBtn.setPreferredSize(btnDimension);
-
-        memoryClearBtn = new JButton("MC");
-        memoryClearBtn.setFont(labelFont);
-        memoryClearBtn.setFocusPainted(false);
-        memoryClearBtn.setBackground(btnColour);
-        memoryClearBtn.setBorder(null);
-        memoryClearBtn.setPreferredSize(btnDimension);
-
-        memoryAddBtn = new JButton("M+");
-        memoryAddBtn.setFont(labelFont);
-        memoryAddBtn.setFocusPainted(false);
-        memoryAddBtn.setBackground(btnColour);
-        memoryAddBtn.setBorder(null);
-        memoryAddBtn.setPreferredSize(btnDimension);
-
-        memoryRemoveBtn = new JButton("M-");
-        memoryRemoveBtn.setFont(labelFont);
-        memoryRemoveBtn.setFocusPainted(false);
-        memoryRemoveBtn.setBackground(btnColour);
-        memoryRemoveBtn.setBorder(null);
-        memoryRemoveBtn.setPreferredSize(btnDimension);
-
-        memoryBtn = new JButton("M↓");
-        memoryBtn.setFont(labelFont);
-        memoryBtn.setFocusPainted(false);
-        memoryBtn.setBackground(btnColour);
-        memoryBtn.setBorder(null);
-        memoryBtn.setPreferredSize(btnDimension);
-    }
-
- */
