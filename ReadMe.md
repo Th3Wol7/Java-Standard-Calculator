@@ -1,7 +1,7 @@
 # Standard Calculator
 Built using Java OOP concepts to implement the look and feel of the 
 standard calculator on the Windows operating System. It completes calculations
-though use of the Math li
+though use of the Math libraries
 
 
 ### Notable Libraries
